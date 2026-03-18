@@ -58,8 +58,8 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php if (isset($_SESSION['utilizator_id'])) { ?>
         
                         <a href="contul_meu.php" class="btn btn-outline-light me-2">Contul meu</a>
-                        <a href="favorite.php" class="btn btn-outline-danger me-2">❤️ Favorite</a>
-                        <a href="cos.php" class="btn btn-success">🛒 Coș</a>
+                        <a href="favorite.php" class="btn btn-outline-danger me-2">❤️</a>
+                        <a href="cos.php" class="btn btn-success">🛒</a>
         
                     <?php } else { ?>
         
