@@ -11,7 +11,7 @@ if (isset($_GET['subcategorie'])) {
     $stmt->execute(['id' => $_GET['subcategorie']]);
 } else {
     $sql = "SELECT * FROM produse";
-    $stmt = $pdo->query($sql);
+    $stmt = $pdo->query($sql); 
 }
 $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
