@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'config.php';
 
 $sql_categorii = "SELECT * FROM categorii";
@@ -20,7 +21,7 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <title>Magazin Custom - Mov & Dark</title>
+    <title>Magazin Custom</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #121212; color: white; }
@@ -53,8 +54,19 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <input class="form-control me-2 bg-dark text-white border-secondary" type="search" placeholder="Căutare...">
                         <button class="btn btn-purple" type="submit">Caută</button>
                     </form>
-                    <a href="login.php" class="btn btn-outline-light me-2">Autentificare</a>
-                    <a href="register.php" class="btn btn-purple">Înregistrare</a>
+    
+                    <?php if (isset($_SESSION['utilizator_id'])) { ?>
+        
+                        <a href="contul_meu.php" class="btn btn-outline-light me-2">Contul meu</a>
+                        <a href="favorite.php" class="btn btn-outline-danger me-2">❤️ Favorite</a>
+                        <a href="cos.php" class="btn btn-success">🛒 Coș</a>
+        
+                    <?php } else { ?>
+        
+                        <a href="login.php" class="btn btn-outline-light me-2">Autentificare</a>
+                        <a href="register.php" class="btn btn-purple">Înregistrare</a>
+        
+                    <?php } ?>
                 </div>
         </div>
     </nav>
@@ -88,7 +100,7 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach($produse as $p) { ?>
                         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
                             <div class="card h-100 shadow">
-                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="card-img-top" alt="..." style="height: 200px; object-fit: cover;">
+                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="card-img-top" alt="..." style="height: 200px; object-fit: contain; background-color: #1f1f1f;">
                                 
                                 <div class="card-body d-flex flex-column">
                                     <h6 class="card-title"><?php echo htmlspecialchars($p['NUME_PRODUS']); ?></h6>

@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once 'config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -9,7 +10,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sql = "INSERT INTO utilizatori (USERNAME, EMAIL, PASSWORD, CREATED_AT) VALUES (:nume, :email, :parola, NOW())";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['nume' => $nume, 'email' => $email, 'parola' => $parola]);
-}
+    header('Location: login.php');
+    exit();
+    }
 ?>
 <!DOCTYPE html>
 <html lang="ro">
