@@ -26,8 +26,9 @@ $utilizator = $stmt->fetch();
                 <h5 class="card-title" style="color: #6f42c1; align-content: center;">Informații cont</h5>
                 <p class="card-text" style="color: #6f42c1; align-content: center;"><strong>Nume utilizator:</strong> <?php echo htmlspecialchars($utilizator['USERNAME']); ?></p>
                 <p class="card-text" style="color: #6f42c1; align-content: center;"><strong>Email:</strong> <?php echo htmlspecialchars($utilizator['EMAIL']); ?></p>
-                <a href="schimbare_parola.php" class="btn btn-outline-light me-2">Schimba parola</a>
+                <a href="schimbare_parola.php" class="btn btn-outline-light">Schimbă parola</a>
                 <a href="logout.php" class="btn btn-outline-light">Deconectare</a>
+                <a href="proiect.php" class="btn btn-outline-light">Înapoi la magazin</a>
             </div>
         </div>
     </div>
