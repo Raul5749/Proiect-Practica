@@ -1,11 +1,7 @@
 <?php
 session_start();
 require_once 'config.php';
-if (!isset($_SESSION['utilizator_id'])) {
-    header('Location: login.php');
-    exit();
-}
-$sql = "SELECT * FROM utilizatori WHERE ID = :id";
+$sql = "SELECT * FROM utilizatori WHERE EMAIL = :email OR USERNAME = :username";
 $stmt = $pdo->prepare($sql);
 $stmt->execute(['id' => $_SESSION['utilizator_id']]);
 $utilizator = $stmt->fetch();
@@ -38,7 +34,8 @@ $utilizator = $stmt->fetch();
                     <?php if (isset($eroare)) { ?>
                         <div class="alert alert-danger mt-3"><?php echo $eroare; ?></div>
                     <?php } ?>
-                  <?php if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                  <?php if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+                  { 
                         $parola_noua = $_POST['parola_noua'];
                         $sql = "UPDATE utilizatori SET PASSWORD = :parola WHERE ID = :id";
                         $stmt = $pdo->prepare($sql);
@@ -48,8 +45,6 @@ $utilizator = $stmt->fetch();
                     ?>
                 </form>
                 <a href="contul_meu.php" class="btn btn-outline-light">Înapoi la contul meu</a>
-                <a href="proiect.php" class="btn btn-outline-light">Înapoi la magazin</a>
-
             </div>
         </div>
     </div>
