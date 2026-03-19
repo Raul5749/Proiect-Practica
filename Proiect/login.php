@@ -56,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="mt-3 text-center">
             <p>Nu ai cont? <a href="register.php" style="color: #bb86fc;">Înregistrează-te aici</a></p>
+            <p>Ai uitat parola? <a href="schimbare_parola.php" style="color: #bb86fc;">Schimba parola</a></p>
+            <p><a href="proiect.php" style="color: #bb86fc;">Înapoi la magazin</a></p>
         </div>
     </div>
 
