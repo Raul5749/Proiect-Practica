@@ -61,8 +61,7 @@ $produse_favorite = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <p class="price-tag mb-3"><?php echo $p['PRET']; ?> Lei</p>
                                 
                                 <div class="d-flex justify-content-between mt-auto">
-                                    <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm">Personalizează</a>
-                                    
+                                    <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm">Personalizează</a>        
                                     <a href="stergere_favorite.php?id=<?php echo $p['ID']; ?>" class="btn btn-outline-danger btn-sm" title="Șterge din favorite">❌</a>
                                 </div>
                             </div>

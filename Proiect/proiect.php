@@ -100,7 +100,7 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach($produse as $p) { ?>
                         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
                             <div class="card h-100 shadow">
-                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="card-img-top" alt="..." style="height: 200px; object-fit: contain; background-color: #1f1f1f;">
+                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="card-img-top" alt="..." style="height: 200px; object-fit: contain; background-color: white;">
                                 
                                 <div class="card-body d-flex flex-column">
                                     <h6 class="card-title"><?php echo htmlspecialchars($p['NUME_PRODUS']); ?></h6>
