@@ -1,38 +1,62 @@
 <?php
 session_start();
 require_once 'config.php';
+
+// 1. Inițializăm coșul dacă nu există
 if (!isset($_SESSION['cos'])) {
     $_SESSION['cos'] = [];
 }
+
+// 2. Adăugarea în coș (inclusiv datele de personalizare)
 if (isset($_GET['adauga'])) {
     $id_produs = (int)$_GET['adauga'];
-    if (isset($_SESSION['cos'][$id_produs])) {
-        $_SESSION['cos'][$id_produs]++;
+    
+    // Preluăm textul și culoarea, dacă există
+    $text_personalizat = isset($_GET['text_personalizat']) ? trim($_GET['text_personalizat']) : '';
+    $culoare_text = isset($_GET['culoare_text']) ? $_GET['culoare_text'] : '';
+
+    // Generăm o cheie unică pentru acest produs + configurația lui
+    // md5 generează un cod unic bazat pe aceste 3 elemente
+    $cheie_cos = md5($id_produs . $text_personalizat . $culoare_text);
+
+    if (isset($_SESSION['cos'][$cheie_cos])) {
+        // Dacă exact aceeași configurație e deja în coș, creștem cantitatea
+        $_SESSION['cos'][$cheie_cos]['cantitate']++;
     } else {
-        $_SESSION['cos'][$id_produs] = 1;
+        // Altfel, adăugăm configurația nouă
+        $_SESSION['cos'][$cheie_cos] = [
+            'id' => $id_produs,
+            'cantitate' => 1,
+            'text' => $text_personalizat,
+            'culoare' => $culoare_text
+        ];
     }
     header('Location: cos.php');
     exit;
 }
-if (isset($_GET['action']) && isset($_GET['id'])) {
-    $id_produs = (int)$_GET['id'];
+
+// 3. Logica pentru modificarea cantității (+, -, ștergere) folosind cheia unică
+if (isset($_GET['action']) && isset($_GET['cheie'])) {
+    $cheie_cos = $_GET['cheie'];
     $actiune = $_GET['action'];
 
-    if (isset($_SESSION['cos'][$id_produs])) {
+    if (isset($_SESSION['cos'][$cheie_cos])) {
         if ($actiune == 'plus') {
-            $_SESSION['cos'][$id_produs]++;
+            $_SESSION['cos'][$cheie_cos]['cantitate']++;
         } elseif ($actiune == 'minus') {
-            $_SESSION['cos'][$id_produs]--;
-            if ($_SESSION['cos'][$id_produs] <= 0) {
-                unset($_SESSION['cos'][$id_produs]);
+            $_SESSION['cos'][$cheie_cos]['cantitate']--;
+            if ($_SESSION['cos'][$cheie_cos]['cantitate'] <= 0) {
+                unset($_SESSION['cos'][$cheie_cos]);
             }
         } elseif ($actiune == 'sterge') {
-            unset($_SESSION['cos'][$id_produs]);
+            unset($_SESSION['cos'][$cheie_cos]);
         }
     }
     header('Location: cos.php');
     exit;
 }
+
+// 4. Golirea totală a coșului
 if (isset($_GET['goleste'])) {
     $_SESSION['cos'] = [];
     header('Location: cos.php');
@@ -52,6 +76,7 @@ if (isset($_GET['goleste'])) {
         .table-dark { background-color: #1f1f1f; }
         .btn-purple { background-color: #6f42c1; color: white; border: none; }
         .btn-purple:hover { background-color: #59339d; color: white; }
+        .badge-custom { background-color: #6f42c1; color: white; }
     </style>
 </head>
 <body>
@@ -76,23 +101,24 @@ if (isset($_GET['goleste'])) {
                     <thead>
                         <tr>
                             <th class="text-start">Produs</th>
+                            <th>Personalizare</th>
                             <th>Preț Unitar</th>
                             <th>Cantitate</th>
                             <th>Subtotal</th>
-                            <th>Sterge produsul din cos</th>
+                            <th>Acțiune</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php 
                         $total_cos = 0;
                         
-                        foreach ($_SESSION['cos'] as $id => $cantitate) { 
+                        foreach ($_SESSION['cos'] as $cheie_cos => $item) { 
                             $stmt = $pdo->prepare("SELECT NUME_PRODUS, PRET, IMAGINE FROM produse WHERE ID = ?");
-                            $stmt->execute([$id]);
+                            $stmt->execute([$item['id']]);
                             $produs = $stmt->fetch(PDO::FETCH_ASSOC);
                             
                             if ($produs) {
-                                $subtotal = $produs['PRET'] * $cantitate;
+                                $subtotal = $produs['PRET'] * $item['cantitate'];
                                 $total_cos += $subtotal;
                         ?>
                             <tr>
@@ -100,17 +126,29 @@ if (isset($_GET['goleste'])) {
                                     <img src="imagini/<?php echo $produs['IMAGINE']; ?>" width="50" height="50" style="object-fit: contain; background: white; border-radius: 5px; margin-right: 10px;">
                                     <?php echo htmlspecialchars($produs['NUME_PRODUS']); ?>
                                 </td>
+                                <td>
+                                    <?php if (!empty($item['text']) && $item['text'] != 'Textul tău aici') { ?>
+                                        <span class="badge badge-custom p-2">
+                                            Text: "<?php echo htmlspecialchars($item['text']); ?>"
+                                        </span><br>
+                                        <span class="badge bg-secondary mt-1">
+                                            Culoare: <span style="display:inline-block; width:12px; height:12px; background-color:<?php echo $item['culoare']; ?>; border-radius:50%; border:1px solid white;"></span> <?php echo $item['culoare']; ?>
+                                        </span>
+                                    <?php } else { ?>
+                                        <span class="text-muted fst-italic">Fără personalizare</span>
+                                    <?php } ?>
+                                </td>
                                 <td><?php echo $produs['PRET']; ?> Lei</td>
                                 <td>
                                     <div class="d-flex justify-content-center align-items-center">
-                                        <a href="cos.php?action=minus&id=<?php echo $id; ?>" class="btn btn-sm btn-outline-light fw-bold">-</a>
-                                        <span class="fs-5 mx-3"><?php echo $cantitate; ?></span>
-                                        <a href="cos.php?action=plus&id=<?php echo $id; ?>" class="btn btn-sm btn-outline-light fw-bold">+</a>
+                                        <a href="cos.php?action=minus&cheie=<?php echo $cheie_cos; ?>" class="btn btn-sm btn-outline-light fw-bold">-</a>
+                                        <span class="fs-5 mx-3"><?php echo $item['cantitate']; ?></span>
+                                        <a href="cos.php?action=plus&cheie=<?php echo $cheie_cos; ?>" class="btn btn-sm btn-outline-light fw-bold">+</a>
                                     </div>
                                 </td>
                                 <td class="fw-bold" style="color: #bb86fc;"><?php echo $subtotal; ?> Lei</td>
                                 <td>
-                                    <a href="cos.php?action=sterge&id=<?php echo $id; ?>" class="btn btn-sm btn-danger" title="Șterge produsul">X</a>
+                                    <a href="cos.php?action=sterge&cheie=<?php echo $cheie_cos; ?>" class="btn btn-sm btn-danger" title="Șterge produsul">X</a>
                                 </td>
                             </tr>
                         <?php } 
@@ -118,7 +156,7 @@ if (isset($_GET['goleste'])) {
                     </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="3" class="text-end fw-bold fs-5">Total de plată:</td>
+                            <td colspan="4" class="text-end fw-bold fs-5">Total de plată:</td>
                             <td colspan="2" class="fw-bold fs-5 text-success text-start"><?php echo $total_cos; ?> Lei</td>
                         </tr>
                     </tfoot>
