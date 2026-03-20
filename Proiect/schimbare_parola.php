@@ -22,10 +22,10 @@ $utilizator = $stmt->fetch();
         <h2 class="mb-4 text-center" style="color: #6f42c1;">Schimbare parolă</h2>
         <div class="card bg-dark border-secondary">
             <div class="card-body text-center" style="color: #6f42c1; align-content: center;">
-                <h5 class="card-title" style="color: #6f42c1; align-content: center;">Introduceți emailul sau Username-ul:</h5>
+                <h5 class="card-title" style="color: #6f42c1; align-content: center;">Introduceți parola actuală:</h5>
                 <form method="POST" class="mb-3">
                     <div class="mb-3">
-                        <input type="email" name="email" class="form-control bg-dark text-white border-secondary" required>
+                        <input type="password" name="parola_actuala" class="form-control bg-dark text-white border-secondary" required>
                     </div>
                 <h5 class="card-title" style="color: #6f42c1; align-content: center;">Introduceți parola nouă:</h5>
                 <form method="POST" class="mb-3">
@@ -42,18 +42,29 @@ $utilizator = $stmt->fetch();
                     <?php if (isset($eroare)) { ?>
                         <div class="alert alert-danger mt-3"><?php echo $eroare; ?></div>
                     <?php } ?>
-                  <?php if ($_SERVER['REQUEST_METHOD'] === 'POST') 
+                  <?php 
+                  if ($_SERVER['REQUEST_METHOD'] === 'POST') 
                   { 
-                        $parola_noua = $_POST['parola_noua'];
-                        $parola_noua_confirm = $_POST['parola_noua_confirm'];
-
-                        if ($parola_noua !== $parola_noua_confirm) {
-                            $eroare = "Parolele nu coincid!";
-                        } else {
-                            $sql = "UPDATE utilizatori SET PASSWORD = :parola WHERE EMAIL = :email";
-                            $stmt = $pdo->prepare($sql);
-                            $stmt->execute(['parola' => password_hash($parola_noua, PASSWORD_DEFAULT), 'email' => $_POST['email']]);
-                        echo '<div class="alert alert-success mt-3">Parola a fost modificată cu succes!</div>';
+                    $parola_actuala = $_POST['parola_actuala'] ?? '';
+                    $parola_noua = $_POST['parola_noua'] ?? '';
+                    $parola_noua_confirm = $_POST['parola_noua_confirm'] ?? '';
+                    if (!password_verify($parola_actuala, $utilizator['PASSWORD'])) {
+                        $eroare = "Parola actuală este incorectă!";
+                        echo '<div class="alert alert-danger mt-3">' . $eroare . '</div>';
+                    } 
+                    elseif ($parola_noua !== $parola_noua_confirm) {
+                       $eroare = "Parolele noi nu coincid!";
+                       echo '<div class="alert alert-danger mt-3">' . $eroare . '</div>';
+                    } 
+                    else {
+                        $sql = "UPDATE utilizatori SET PASSWORD = :parola_noua WHERE ID = :id";
+                        $stmt = $pdo->prepare($sql);
+                        $stmt->execute([
+                        'parola_noua' => password_hash($parola_noua, PASSWORD_DEFAULT), 
+                        'id' => $_SESSION['utilizator_id']
+                        ]);
+                        $succes = "Parola a fost modificată cu succes!";
+                        echo '<div class="alert alert-success mt-3">' . $succes . '</div>';
                     }
                   }
                     ?>

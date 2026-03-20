@@ -106,7 +106,7 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <h6 class="card-title"><?php echo htmlspecialchars($p['NUME_PRODUS']); ?></h6>
                                     <p class="price-tag mb-3"><?php echo $p['PRET']; ?> Lei</p>
                                     
-                                    <?php if($p['ID_SUBCATEGORIE'] == 1) { // 1 = Tricouri (ID-ul din baza ta) ?>
+                                    <?php if($p['ID_SUBCATEGORIE'] == 1) { ?>
                                         <select class="form-select form-select-sm mb-3 bg-dark text-white border-secondary">
                                             <option>Alege mărimea</option>
                                             <option>S</option>
@@ -116,7 +116,10 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </select>
                                     <?php } ?>
 
-                                    <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm mt-auto">Personalizează</a>
+                                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                                        <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm">Personalizează</a>
+                                        <a href="adauga_favorite.php?id=<?php echo $p['ID']; ?>" class="btn btn-outline-danger btn-sm" title="Adaugă la favorite">❤️</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -124,7 +127,7 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
         </div>
-    </div>
+    </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
