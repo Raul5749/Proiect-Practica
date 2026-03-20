@@ -10,7 +10,19 @@ if (isset($_GET['subcategorie'])) {
     $sql = "SELECT * FROM produse WHERE ID_SUBCATEGORIE = :id";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['id' => $_GET['subcategorie']]);
-} else {
+}
+elseif(isset($_GET['categorie'])) {
+    $sql = "SELECT p.* FROM produse p JOIN subcategorii s ON p.ID_SUBCATEGORIE = s.ID WHERE s.ID_CATEGORIE = :id";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['id' => $_GET['categorie']]);
+}
+elseif (isset($_GET['cautare'])) {
+    $termen = '%' . $_GET['cautare'] . '%';
+    $sql = "SELECT * FROM produse WHERE NUME_PRODUS LIKE :termen";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['termen' => $termen]);
+}
+else {
     $sql = "SELECT * FROM produse";
     $stmt = $pdo->query($sql); 
 }
@@ -50,8 +62,8 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="container-fluid">
             <a class="navbar-brand fw-bold" href="proiect.php" style="color: #6f42c1;">CUSTOM<span class="text-white">SHOP</span></a>
                 <div class="d-flex align-items-center">
-                    <form class="d-flex me-4">
-                        <input class="form-control me-2 bg-dark text-white border-secondary" type="search" placeholder="Căutare...">
+                    <form class="d-flex me-4" action="proiect.php" method="GET">
+                        <input class="form-control me-2 bg-dark text-white border-secondary" type="search" name="cautare" placeholder="Căutare...">
                         <button class="btn btn-purple" type="submit">Caută</button>
                     </form>
     
@@ -82,7 +94,7 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $subs = $stmt_sub->fetchAll();
                     ?>
                         <div class="dropdown mb-2">
-                            <a class="dropdown-toggle" href="#">
+                            <a class="dropdown-toggle text-decoration-none" href="proiect.php?categorie=<?php echo $categorie['ID']; ?>">
                                 <?php echo $categorie['NUME_CATEGORIE']; ?>
                             </a>
                             <ul class="dropdown-menu">
@@ -100,13 +112,15 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php foreach($produse as $p) { ?>
                         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
                             <div class="card h-100 shadow">
-                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="card-img-top" alt="..." style="height: 200px; object-fit: contain; background-color: white;">
+                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="card-img-top" alt="..." 
+                                    style="height: 200px; object-fit: contain; background-color: white; cursor: pointer;"
+                                    data-bs-toggle="modal" data-bs-target="#modalProdus<?php echo $p['ID']; ?>">
                                 
                                 <div class="card-body d-flex flex-column">
                                     <h6 class="card-title"><?php echo htmlspecialchars($p['NUME_PRODUS']); ?></h6>
                                     <p class="price-tag mb-3"><?php echo $p['PRET']; ?> Lei</p>
                                     
-                                    <?php if($p['ID_SUBCATEGORIE'] == 1) { ?>
+                                    <?php if($p['ID_SUBCATEGORIE'] == 1 || $p['ID_SUBCATEGORIE']==2) { ?>
                                         <select class="form-select form-select-sm mb-3 bg-dark text-white border-secondary">
                                             <option>Alege mărimea</option>
                                             <option>S</option>
@@ -119,6 +133,43 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <div class="d-flex justify-content-between align-items-center mt-auto">
                                         <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm">Personalizează</a>
                                         <a href="adauga_favorite.php?id=<?php echo $p['ID']; ?>" class="btn btn-outline-danger btn-sm" title="Adaugă la favorite">❤️</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="modalProdus<?php echo $p['ID']; ?>" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                <div class="modal-content bg-dark text-white border-secondary">
+                                    <div class="modal-header border-secondary">
+                                        <h5 class="modal-title text-purple" style="color: #6f42c1;"><?php echo htmlspecialchars($p['NUME_PRODUS']); ?></h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Închide"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <img src="imagini/<?php echo $p['IMAGINE']; ?>" class="img-fluid rounded" style="background-color: white; width: 100%; object-fit: contain;" alt="...">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h3 class="price-tag mb-4"><?php echo $p['PRET']; ?> Lei</h3>
+                                                <p><?php echo htmlspecialchars($p['DESCRIERE']); ?></p>
+                                                
+                                                <?php if($p['ID_SUBCATEGORIE'] == 1 || $p['ID_SUBCATEGORIE'] == 2) { ?>
+                                                    <label class="mb-2">Mărime:</label>
+                                                    <select class="form-select mb-4 bg-dark text-white border-secondary">
+                                                        <option>S</option>
+                                                        <option>M</option>
+                                                        <option>L</option>
+                                                        <option>XL</option>
+                                                    </select>
+                                                <?php } ?>
+                                                
+                                                <div class="d-grid gap-2">
+                                                    <a href="cos.php?adauga=<?php echo $p['ID']; ?>" class="btn btn-success btn-lg">Adaugă în coș 🛒</a>
+                                                    <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple">Mergi la personalizare</a>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

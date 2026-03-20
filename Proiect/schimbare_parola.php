@@ -17,10 +17,10 @@ $utilizator = $stmt->fetch();
     <title>Contul meu - CustomShop</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-dark text-white">
+<body class="text-white" style="background-color: #121212;">
     <div class="container mt-5" style="max-width: 600px;">
         <h2 class="mb-4 text-center" style="color: #6f42c1;">Schimbare parolă</h2>
-        <div class="card bg-dark border-secondary">
+        <div class="card  border-secondary" style="background-color: #1f1f1f;">
             <div class="card-body text-center" style="color: #6f42c1; align-content: center;">
                 <h5 class="card-title" style="color: #6f42c1; align-content: center;">Introduceți parola actuală:</h5>
                 <form method="POST" class="mb-3">
