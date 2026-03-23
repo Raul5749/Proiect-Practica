@@ -22,8 +22,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $total += $p['PRET'] * $item['cantitate'];
     }
 
-    $stmt_cmd = $pdo->prepare("INSERT INTO comenzi (NUME_CLIENT, TELEFON, ADRESA, TOTAL_PLATIT) VALUES (?, ?, ?, ?)");
-    $stmt_cmd->execute([$nume, $telefon, $adresa, $total]);
+    $id_utilizator = isset($_SESSION['utilizator_id']) ? $_SESSION['utilizator_id'] : null;
+    $stmt_cmd = $pdo->prepare("INSERT INTO comenzi (ID_UTILIZATOR, NUME_CLIENT, TELEFON, ADRESA, TOTAL_PLATIT) VALUES (?, ?, ?, ?, ?)");
+    $stmt_cmd->execute([$id_utilizator, $nume, $telefon, $adresa, $total]);
     $id_comanda = $pdo->lastInsertId();
 
     foreach ($_SESSION['cos'] as $item) {
@@ -35,7 +36,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt_det->execute([$id_comanda, $item['id'], $item['cantitate'], $p['PRET'], $item['text'], $item['culoare']]);
     }
 
-    // 3. Golim coșul după plată
     $_SESSION['cos'] = [];
     $mesaj_succes = "🎉 Comanda a fost plasată cu succes! ID Comandă: #$id_comanda";
 }
