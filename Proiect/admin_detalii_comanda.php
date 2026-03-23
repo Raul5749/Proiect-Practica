@@ -105,8 +105,6 @@ $produse_comandate = $stmt_prod->fetchAll(PDO::FETCH_ASSOC);
                 </tfoot>
             </table>
         </div>
-
     </div>
-
 </body>
 </html>
