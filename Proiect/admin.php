@@ -87,8 +87,8 @@ $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
                                     </td>
                                     <td><?php echo !empty($p['MARIME']) ? $p['MARIME'] : '-'; ?></td>
                                     <td>
-                                        <a href="#" class="btn btn-sm btn-primary">Editează ✏️</a>
-                                        <a href="#" class="btn btn-sm btn-danger">Șterge 🗑️</a>
+                                        <a href="editeaza_produs.php?id=<?php echo $p['ID']; ?>" class="btn btn-sm btn-primary">Editează ✏️</a>
+                                        <a href="sterge_produs.php?id=<?php echo $p['ID']; ?>" class="btn btn-sm btn-danger">Șterge 🗑️</a>
                                     </td>
                                 </tr>
                             <?php } ?>
