@@ -165,7 +165,7 @@ if (isset($_GET['goleste'])) {
             
             <div class="d-flex justify-content-between mt-4">
                 <a href="cos.php?goleste=1" class="btn btn-outline-danger">Golește coșul</a>
-                <button class="btn btn-success btn-lg">Finalizează comanda</button>
+                <a href="checkout.php" class="btn btn-success btn-lg">Finalizează comanda</a>
             </div>
         <?php } ?>
     </div>

@@ -1,13 +1,14 @@
 <?php
 session_start();
 require_once 'config.php';
-
-// ATENȚIE: În viitor, aici vom pune o verificare ca doar tu (adminul) să poți accesa pagina.
-// if (!isset($_SESSION['admin_logat'])) { header('Location: login.php'); exit; }
-
-// Preluăm toate produsele din baza de date pentru a le afișa în tabel
+if (!isset($_SESSION['ADMIN']) || $_SESSION['ADMIN'] !== 1) {
+    header('Location: login.php');
+    exit;
+}
 $stmt = $pdo->query("SELECT * FROM produse ORDER BY ID DESC");
 $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt_comenzi = $pdo->query("SELECT * FROM comenzi ORDER BY DATA_COMANDA DESC");
+$comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -93,6 +94,34 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php } ?>
                         </tbody>
                     </table>
+                    <h2 class="text-success mt-5 mb-4">🛒 Ultimele Comenzi</h2>
+                        <div class="table-responsive shadow-lg">
+                            <table class="table table-dark table-hover table-bordered border-secondary align-middle text-center">
+                                <thead class="table-active">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nume Client</th>
+                                        <th>Telefon</th>
+                                        <th>Total</th>
+                                        <th>Data</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($comenzi as $c) { ?>
+                                        <tr>
+                                            <td class="text-start fw-bold">#<?php echo $c['ID']; ?></td>
+                                            <td class="text-start"><?php echo htmlspecialchars($c['NUME_CLIENT']); ?></td>
+                                            <td><?php echo htmlspecialchars($c['TELEFON']); ?></td>
+                                            <td class="fw-bold text-success"><?php echo $c['TOTAL_PLATIT']; ?> Lei</td>
+                                            <td><?php echo date('d-m-Y H:i', strtotime($c['DATA_COMANDA'])); ?></td>
+                                            <td><span class="badge bg-warning text-dark"><?php echo $c['STATUS']; ?></span></td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                            </table>
+                        </div>
+
                 </div>
 
             </div>
