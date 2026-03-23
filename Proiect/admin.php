@@ -53,7 +53,7 @@ $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
                 
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="text-danger">Gestionare Produse</h2>
-                    <a href="#" class="btn btn-success fw-bold">+ Adaugă Produs Nou</a>
+                    <a href="adauga_produs.php" class="btn btn-success fw-bold">+ Adaugă Produs Nou</a>
                 </div>
 
                 <div class="table-responsive shadow-lg">
