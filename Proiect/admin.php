@@ -9,6 +9,9 @@ $stmt = $pdo->query("SELECT * FROM produse ORDER BY ID DESC");
 $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $stmt_comenzi = $pdo->query("SELECT * FROM comenzi ORDER BY DATA_COMANDA DESC");
 $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
+
+$stmt_count = $pdo->query("SELECT COUNT(*) FROM comenzi WHERE STATUS = 'Noua' OR STATUS IS NULL");
+$comenzi_noi = $stmt_count->fetchColumn();
 ?>
 
 <!DOCTYPE html>
@@ -39,16 +42,18 @@ $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
     </nav>
 
     <div class="container-fluid">
-        <div class="row">
-            
+        <div class="row"> 
             <div class="col-md-3 col-lg-2 sidebar shadow">
-                <h6 class="text-muted text-uppercase mb-3 mt-2">Meniu</h6>
-                <a href="admin.php" class="active">📦 Produsele mele</a>
-                <a href="#">🛒 Comenzi primite <span class="badge bg-danger float-end">0</span></a>
-                <a href="#">👥 Utilizatori</a>
-                <a href="#">⚙️ Setări magazin</a>
-            </div>
-
+            <h6 class="text-muted text-uppercase mb-3 mt-2">Meniu</h6>
+            <a href="admin.php" class="active">📦 Produsele mele</a>
+            <a href="admin_comenzi.php">🛒 Comenzi primite 
+            <?php if ($comenzi_noi > 0) { ?>
+                <span class="badge bg-danger float-end"><?php echo $comenzi_noi; ?></span>
+            <?php } ?>
+        </a>
+        <a href="admin_utilizatori.php">👥 Utilizatori</a>
+        <a href="#">⚙️ Setări magazin</a>
+    </div>
             <div class="col-md-9 col-lg-10 p-4">
                 
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -94,34 +99,6 @@ $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
                             <?php } ?>
                         </tbody>
                     </table>
-                    <h2 class="text-success mt-5 mb-4">🛒 Ultimele Comenzi</h2>
-                        <div class="table-responsive shadow-lg">
-                            <table class="table table-dark table-hover table-bordered border-secondary align-middle text-center">
-                                <thead class="table-active">
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Nume Client</th>
-                                        <th>Telefon</th>
-                                        <th>Total</th>
-                                        <th>Data</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($comenzi as $c) { ?>
-                                        <tr>
-                                            <td class="text-start fw-bold">#<?php echo $c['ID']; ?></td>
-                                            <td class="text-start"><?php echo htmlspecialchars($c['NUME_CLIENT']); ?></td>
-                                            <td><?php echo htmlspecialchars($c['TELEFON']); ?></td>
-                                            <td class="fw-bold text-success"><?php echo $c['TOTAL_PLATIT']; ?> Lei</td>
-                                            <td><?php echo date('d-m-Y H:i', strtotime($c['DATA_COMANDA'])); ?></td>
-                                            <td><span class="badge bg-warning text-dark"><?php echo $c['STATUS']; ?></span></td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-
                 </div>
 
             </div>
