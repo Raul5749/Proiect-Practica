@@ -2,16 +2,18 @@
 session_start();
 require_once 'config.php';
 
+// 1. Inițializăm coșul dacă nu există
 if (!isset($_SESSION['cos'])) {
     $_SESSION['cos'] = [];
 }
 
+// 2. Adăugarea în coș
 if (isset($_GET['adauga'])) {
     $id_produs = (int)$_GET['adauga'];
-    
     $text_personalizat = isset($_GET['text_personalizat']) ? trim($_GET['text_personalizat']) : '';
     $culoare_text = isset($_GET['culoare_text']) ? $_GET['culoare_text'] : '';
-    $marime = isset($_GET['marime']) ? trim($_GET['marime']) : '';
+    $marime = isset($_GET['marime']) ? trim($_GET['marime']) : 'Standard';
+
     $cheie_cos = md5($id_produs . $text_personalizat . $culoare_text . $marime);
 
     if (isset($_SESSION['cos'][$cheie_cos])) {
@@ -29,6 +31,7 @@ if (isset($_GET['adauga'])) {
     exit;
 }
 
+// 3. Modificare cantitate (+, -, ștergere)
 if (isset($_GET['action']) && isset($_GET['cheie'])) {
     $cheie_cos = $_GET['cheie'];
     $actiune = $_GET['action'];
@@ -49,8 +52,37 @@ if (isset($_GET['action']) && isset($_GET['cheie'])) {
     exit;
 }
 
+// 4. Golire coș
 if (isset($_GET['goleste'])) {
     $_SESSION['cos'] = [];
+    unset($_SESSION['cupon']); // Ștergem și cuponul dacă golim coșul
+    header('Location: cos.php');
+    exit;
+}
+
+// 5. LOGICA PENTRU CUPONUL DE REDUCERE 🎟️
+$mesaj_cupon = '';
+if (isset($_POST['aplica_cupon'])) {
+    $cod = trim($_POST['cod_cupon']);
+    $stmt = $pdo->prepare("SELECT * FROM cupoane WHERE COD = ? AND ACTIV = 1");
+    $stmt->execute([$cod]);
+    $cupon = $stmt->fetch();
+
+    if ($cupon) {
+        $_SESSION['cupon'] = [
+            'cod' => $cupon['COD'],
+            'procent' => $cupon['PROCENT_REDUCERE']
+        ];
+        $mesaj_cupon = "<div class='alert alert-success mt-2 p-2'>✅ Cupon aplicat: -" . $cupon['PROCENT_REDUCERE'] . "% reducere!</div>";
+    } else {
+        $mesaj_cupon = "<div class='alert alert-danger mt-2 p-2'>❌ Cupon invalid sau expirat!</div>";
+        unset($_SESSION['cupon']);
+    }
+}
+
+// 6. Ștergere cupon
+if (isset($_GET['sterge_cupon'])) {
+    unset($_SESSION['cupon']);
     header('Location: cos.php');
     exit;
 }
@@ -88,12 +120,12 @@ if (isset($_GET['goleste'])) {
                 Coșul tău este gol. <a href="proiect.php" style="color: #bb86fc;">Întoarce-te la magazin</a> pentru a adăuga produse!
             </div>
         <?php } else { ?>
-            <div class="table-responsive">
-                <table class="table table-dark table-bordered border-secondary align-middle text-center">
-                    <thead>
+            <div class="table-responsive shadow-lg">
+                <table class="table table-dark table-bordered border-secondary align-middle text-center mb-0">
+                    <thead class="table-active">
                         <tr>
                             <th class="text-start">Produs</th>
-                            <th>Personalizare</th>
+                            <th>Detalii</th>
                             <th>Preț Unitar</th>
                             <th>Cantitate</th>
                             <th>Subtotal</th>
@@ -116,21 +148,17 @@ if (isset($_GET['goleste'])) {
                             <tr>
                                 <td class="text-start">
                                     <img src="imagini/<?php echo $produs['IMAGINE']; ?>" width="50" height="50" style="object-fit: contain; background: white; border-radius: 5px; margin-right: 10px;">
-                                    <?php echo htmlspecialchars($produs['NUME_PRODUS']); ?>
+                                    <span class="fw-bold"><?php echo htmlspecialchars($produs['NUME_PRODUS']); ?></span>
                                 </td>
-                                <td>
+                                <td class="text-start">
                                     <?php if (!empty($item['text']) && $item['text'] != 'Textul tău aici') { ?>
-                                        <span class="badge badge-custom p-2">
-                                            Text: "<?php echo htmlspecialchars($item['text']); ?>"
-                                        </span><br>
-                                        <span class="badge bg-secondary mt-1">
-                                            Culoare: <span style="display:inline-block; width:12px; height:12px; background-color:<?php echo $item['culoare']; ?>; border-radius:50%; border:1px solid white;"></span> <?php echo $item['culoare']; ?>
-                                        </span>
+                                        <span class="badge badge-custom p-2 mb-1">Text: "<?php echo htmlspecialchars($item['text']); ?>"</span><br>
+                                        <span class="badge bg-secondary mb-1">Culoare: <span style="display:inline-block; width:10px; height:10px; background-color:<?php echo $item['culoare']; ?>; border-radius:50%; border:1px solid white;"></span> <?php echo $item['culoare']; ?></span>
                                     <?php } else { ?>
-                                        <span class="text-muted fst-italic">Fără text</span>
+                                        <span class="text-muted fst-italic">Fără personalizare</span>
                                     <?php } ?>
                                     
-                                    <?php if (!empty($item['marime'])) { ?>
+                                    <?php if (!empty($item['marime']) && $item['marime'] != 'Standard') { ?>
                                         <br><span class="badge bg-info text-dark mt-1">Mărime: <?php echo htmlspecialchars($item['marime']); ?></span>
                                     <?php } ?>
                                 </td>
@@ -150,18 +178,42 @@ if (isset($_GET['goleste'])) {
                         <?php } 
                         } ?>
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" class="text-end fw-bold fs-5">Total de plată:</td>
-                            <td colspan="2" class="fw-bold fs-5 text-success text-start"><?php echo $total_cos; ?> Lei</td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
+
+            <div class="row mt-4 align-items-center">
+                <div class="col-md-5">
+                    <form method="POST" class="d-flex">
+                        <input type="text" name="cod_cupon" class="form-control bg-dark text-white border-secondary me-2" placeholder="Cod reducere..." value="<?php echo isset($_SESSION['cupon']) ? $_SESSION['cupon']['cod'] : ''; ?>" <?php echo isset($_SESSION['cupon']) ? 'disabled' : ''; ?>>
+                        
+                        <?php if(!isset($_SESSION['cupon'])) { ?>
+                            <button type="submit" name="aplica_cupon" class="btn btn-warning fw-bold">Aplică</button>
+                        <?php } else { ?>
+                            <a href="cos.php?sterge_cupon=1" class="btn btn-danger fw-bold">Șterge</a>
+                        <?php } ?>
+                    </form>
+                    <?php echo $mesaj_cupon; ?>
+                </div>
+                
+                <div class="col-md-7 text-end bg-dark p-3 rounded border border-secondary shadow-sm">
+                    <h5 class="text-muted mb-2">Subtotal: <?php echo $total_cos; ?> Lei</h5>
+                    
+                    <?php 
+                    $total_final = $total_cos;
+                    if (isset($_SESSION['cupon'])) { 
+                        $valoare_reducere = ($total_cos * $_SESSION['cupon']['procent']) / 100;
+                        $total_final = $total_cos - $valoare_reducere;
+                    ?>
+                        <h5 class="text-warning mb-2">Reducere (<?php echo $_SESSION['cupon']['procent']; ?>%): -<?php echo $valoare_reducere; ?> Lei</h5>
+                    <?php } ?>
+
+                    <h3 class="fw-bold text-success mt-3 border-top border-secondary pt-2">TOTAL PLĂTIT: <?php echo $total_final; ?> Lei</h3>
+                </div>
+            </div>
             
-            <div class="d-flex justify-content-between mt-4">
+            <div class="d-flex justify-content-between mt-4 mb-5">
                 <a href="cos.php?goleste=1" class="btn btn-outline-danger">Golește coșul</a>
-                <a href="checkout.php" class="btn btn-success btn-lg">Finalizează comanda</a>
+                <a href="checkout.php" class="btn btn-success btn-lg fw-bold px-5">Finalizează comanda 💳</a>
             </div>
         <?php } ?>
     </div>

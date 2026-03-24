@@ -12,6 +12,34 @@ $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt_count = $pdo->query("SELECT COUNT(*) FROM comenzi WHERE STATUS = 'Noua' OR STATUS IS NULL");
 $comenzi_noi = $stmt_count->fetchColumn();
+
+$sql_grafic = "SELECT DATE(DATA_COMANDA) as data_zi, SUM(TOTAL_PLATIT) as total_zi 
+               FROM comenzi 
+               WHERE DATA_COMANDA >= DATE(NOW()) - INTERVAL 7 DAY 
+               GROUP BY DATE(DATA_COMANDA) 
+               ORDER BY data_zi ASC";
+$vanzari_7_zile = $pdo->query($sql_grafic)->fetchAll(PDO::FETCH_ASSOC);
+
+$zile_chart = [];
+$totaluri_chart = [];
+foreach($vanzari_7_zile as $v) {
+    $zile_chart[] = date('d.m', strtotime($v['data_zi'])); 
+    $totaluri_chart[] = $v['total_zi'];
+}
+$zile_json = json_encode($zile_chart);
+$totaluri_json = json_encode($totaluri_chart);
+
+$sql_status = "SELECT STATUS, COUNT(ID) as numar FROM comenzi GROUP BY STATUS";
+$statusuri_db = $pdo->query($sql_status)->fetchAll(PDO::FETCH_ASSOC);
+
+$nume_status = [];
+$numar_status = [];
+foreach($statusuri_db as $s) {
+    $nume_status[] = empty($s['STATUS']) ? 'Noua' : $s['STATUS'];
+    $numar_status[] = $s['numar'];
+}
+$nume_status_json = json_encode($nume_status);
+$numar_status_json = json_encode($numar_status);
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +50,7 @@ $comenzi_noi = $stmt_count->fetchColumn();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #121212; color: white; }
-        .navbar-admin { background-color: #000000 !important; border-bottom: 2px solid #dc3545; } /* Roșu pentru admin */
+        .navbar-admin { background-color: #000000 !important; border-bottom: 2px solid #dc3545; }
         .sidebar { background-color: #1f1f1f; min-height: 100vh; padding: 20px; border-right: 1px solid #333; }
         .sidebar a { color: #e0e0e0; text-decoration: none; display: block; padding: 12px; border-radius: 5px; margin-bottom: 5px; transition: 0.3s;}
         .sidebar a:hover, .sidebar a.active { background-color: #dc3545; color: white; }
@@ -43,22 +71,50 @@ $comenzi_noi = $stmt_count->fetchColumn();
 
     <div class="container-fluid">
         <div class="row"> 
+            
             <div class="col-md-3 col-lg-2 sidebar shadow">
-            <h6 class="text-muted text-uppercase mb-3 mt-2">Meniu</h6>
-            <a href="admin.php" class="active">📦 Produsele mele</a>
-            <a href="admin_comenzi.php">🛒 Comenzi primite 
-            <?php if ($comenzi_noi > 0) { ?>
-                <span class="badge bg-danger float-end"><?php echo $comenzi_noi; ?></span>
-            <?php } ?>
-        </a>
-        <a href="admin_utilizatori.php">👥 Utilizatori</a>
-        <a href="#">⚙️ Setări magazin</a>
-    </div>
+                <h6 class="text-danger text-uppercase mb-3 mt-2">Meniu</h6>
+                <a href="admin.php" class="active">📦 Produsele mele</a>
+                <a href="admin_comenzi.php">🛒 Comenzi primite 
+                <?php if ($comenzi_noi > 0) { ?>
+                    <span class="badge bg-danger float-end"><?php echo $comenzi_noi; ?></span>
+                <?php } ?>
+                </a>
+                <a href="admin_utilizatori.php">👥 Utilizatori</a>
+                <a href="admin_setari.php">⚙️ Setări magazin</a>
+            </div>
+            
             <div class="col-md-9 col-lg-10 p-4">
                 
+                <div class="row mb-4">
+                    <div class="col-lg-8 col-md-12 mb-3">
+                        <div class="card bg-dark border-secondary shadow h-100">
+                            <div class="card-header border-secondary text-info fw-bold">
+                                📈 Încasări pe ultimele 7 zile
+                            </div>
+                            <div class="card-body">
+                                <canvas id="chartVanzari" style="max-height: 250px; width: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4 col-md-12 mb-3">
+                        <div class="card bg-dark border-secondary shadow h-100">
+                            <div class="card-header border-secondary text-warning fw-bold">
+                                📊 Proporție Status Comenzi
+                            </div>
+                            <div class="card-body d-flex justify-content-center align-items-center">
+                                <canvas id="chartStatus" style="max-height: 250px; width: 100%;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-secondary mb-4">
+
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="text-danger">Gestionare Produse</h2>
-                    <a href="adauga_produs.php" class="btn btn-success fw-bold">+ Adaugă Produs Nou</a>
+                    <h2 class="text-danger m-0">📦 Gestionare Produse</h2>
+                    <a href="adauga_produs.php" class="btn btn-success fw-bold shadow-sm">+ Adaugă Produs Nou</a>
                 </div>
 
                 <div class="table-responsive shadow-lg">
@@ -93,7 +149,7 @@ $comenzi_noi = $stmt_count->fetchColumn();
                                     <td><?php echo !empty($p['MARIME']) ? $p['MARIME'] : '-'; ?></td>
                                     <td>
                                         <a href="editeaza_produs.php?id=<?php echo $p['ID']; ?>" class="btn btn-sm btn-primary">Editează ✏️</a>
-                                        <a href="sterge_produs.php?id=<?php echo $p['ID']; ?>" class="btn btn-sm btn-danger">Șterge 🗑️</a>
+                                        <a href="sterge_produs.php?id=<?php echo $p['ID']; ?>" class="btn btn-sm btn-danger" onclick="return confirm('Sigur vrei să ștergi acest produs?');">Șterge 🗑️</a>
                                     </td>
                                 </tr>
                             <?php } ?>
@@ -105,5 +161,57 @@ $comenzi_noi = $stmt_count->fetchColumn();
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctxVanzari = document.getElementById('chartVanzari').getContext('2d');
+        new Chart(ctxVanzari, {
+            type: 'line',
+            data: {
+                labels: <?php echo $zile_json; ?>,
+                datasets: [{
+                    label: 'Încasări (Lei)',
+                    data: <?php echo $totaluri_json; ?>,
+                    borderColor: '#0dcaf0',
+                    backgroundColor: 'rgba(13, 202, 240, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.3, 
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#333' } },
+                    x: { grid: { color: '#333' } }
+                },
+                plugins: { legend: { labels: { color: 'white' } } }
+            }
+        });
+        const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: <?php echo $nume_status_json; ?>,
+                datasets: [{
+                    data: <?php echo $numar_status_json; ?>,
+                    backgroundColor: [
+                        '#ffc107', 
+                        '#0d6efd', 
+                        '#198754', 
+                        '#0dcaf0', 
+                        '#dc3545'  
+                    ],
+                    borderColor: '#1f1f1f',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom', labels: { color: 'white' } } }
+            }
+        });
+    </script>
 </body>
 </html>

@@ -10,9 +10,9 @@ if (empty($_SESSION['cos'])) {
 $mesaj_succes = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nume = $_POST['nume'];
-    $telefon = $_POST['telefon'];
-    $adresa = $_POST['adresa'];
+    $nume = trim($_POST['nume']);
+    $telefon = trim($_POST['telefon']);
+    $adresa = trim($_POST['adresa']);
     
     $total = 0;
     foreach ($_SESSION['cos'] as $item) {
@@ -21,7 +21,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $p = $stmt->fetch();
         $total += $p['PRET'] * $item['cantitate'];
     }
-
+    if (isset($_SESSION['cupon'])) {
+        $reducere = ($total * $_SESSION['cupon']['procent']) / 100;
+        $total = $total - $reducere;
+    }
     $id_utilizator = isset($_SESSION['utilizator_id']) ? $_SESSION['utilizator_id'] : null;
     $stmt_cmd = $pdo->prepare("INSERT INTO comenzi (ID_UTILIZATOR, NUME_CLIENT, TELEFON, ADRESA, TOTAL_PLATIT) VALUES (?, ?, ?, ?, ?)");
     $stmt_cmd->execute([$id_utilizator, $nume, $telefon, $adresa, $total]);
@@ -32,11 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $stmt_p->execute([$item['id']]);
         $p = $stmt_p->fetch();
 
-        $stmt_det = $pdo->prepare("INSERT INTO comenzi_produse (ID_COMANDA, ID_PRODUS, CANTITATE, PRET_UNITAR, TEXT_PERSONALIZAT, CULOARE_TEXT) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt_det->execute([$id_comanda, $item['id'], $item['cantitate'], $p['PRET'], $item['text'], $item['culoare']]);
+        $marime = isset($item['marime']) ? $item['marime'] : ''; 
+        $stmt_det = $pdo->prepare("INSERT INTO comenzi_produse (ID_COMANDA, ID_PRODUS, CANTITATE, PRET_UNITAR, TEXT_PERSONALIZAT, CULOARE_TEXT, MARIME_ALEASA) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt_det->execute([$id_comanda, $item['id'], $item['cantitate'], $p['PRET'], $item['text'], $item['culoare'], $marime]);
+
+        $stmt_stoc = $pdo->prepare("UPDATE produse SET STOC = STOC - ? WHERE ID = ?");
+        $stmt_stoc->execute([$item['cantitate'], $item['id']]);
     }
 
     $_SESSION['cos'] = [];
+    unset($_SESSION['cupon']);
     $mesaj_succes = "🎉 Comanda a fost plasată cu succes! ID Comandă: #$id_comanda";
 }
 ?>
