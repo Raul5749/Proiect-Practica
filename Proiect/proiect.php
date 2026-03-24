@@ -120,20 +120,26 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <h6 class="card-title"><?php echo htmlspecialchars($p['NUME_PRODUS']); ?></h6>
                                     <p class="price-tag mb-3"><?php echo $p['PRET']; ?> Lei</p>
                                     
-                                    <?php if($p['ID_SUBCATEGORIE'] == 1 || $p['ID_SUBCATEGORIE']==2) { ?>
-                                        <select class="form-select form-select-sm mb-3 bg-dark text-white border-secondary">
-                                            <option>Alege mărimea</option>
-                                            <option>S</option>
-                                            <option>M</option>
-                                            <option>L</option>
-                                            <option>XL</option>
-                                        </select>
-                                    <?php } ?>
+                                    <form action="cos.php" method="GET" class="mt-auto">
+                                        <input type="hidden" name="adauga" value="<?php echo $p['ID']; ?>">
+                                        
+                                        <?php if($p['ID_SUBCATEGORIE'] == 1 || $p['ID_SUBCATEGORIE']==2) { ?>
+                                            <select name="marime" class="form-select form-select-sm mb-3 bg-dark text-white border-secondary">
+                                                <option value="S">S</option>
+                                                <option value="M" selected>M</option>
+                                                <option value="L">L</option>
+                                                <option value="XL">XL</option>
+                                            </select>
+                                        <?php } else { ?>
+                                            <input type="hidden" name="marime" value="Standard">
+                                        <?php } ?>
 
-                                    <div class="d-flex justify-content-between align-items-center mt-auto">
-                                        <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm">Personalizează</a>
-                                        <a href="adauga_favorite.php?id=<?php echo $p['ID']; ?>" class="btn btn-outline-danger btn-sm" title="Adaugă la favorite">❤️</a>
-                                    </div>
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <button type="submit" class="btn btn-success btn-sm w-100 me-2">Adaugă în coș 🛒</button>
+                                            <a href="adauga_favorite.php?id=<?php echo $p['ID']; ?>" class="btn btn-outline-danger btn-sm" title="Adaugă la favorite">❤️</a>
+                                        </div>
+                                        <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple btn-sm w-100">Personalizează</a>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -154,20 +160,27 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <h3 class="price-tag mb-4"><?php echo $p['PRET']; ?> Lei</h3>
                                                 <p><?php echo htmlspecialchars($p['DESCRIERE']); ?></p>
                                                 
-                                                <?php if($p['ID_SUBCATEGORIE'] == 1 || $p['ID_SUBCATEGORIE'] == 2) { ?>
-                                                    <label class="mb-2">Mărime:</label>
-                                                    <select class="form-select mb-4 bg-dark text-white border-secondary">
-                                                        <option>S</option>
-                                                        <option>M</option>
-                                                        <option>L</option>
-                                                        <option>XL</option>
-                                                    </select>
-                                                <?php } ?>
+                                                <form action="cos.php" method="GET">
+                                                    <input type="hidden" name="adauga" value="<?php echo $p['ID']; ?>">
+                                                    
+                                                    <?php if($p['ID_SUBCATEGORIE'] == 1 || $p['ID_SUBCATEGORIE'] == 2) { ?>
+                                                        <label class="mb-2">Mărime:</label>
+                                                        <select name="marime" class="form-select mb-4 bg-dark text-white border-secondary">
+                                                            <option value="S">S</option>
+                                                            <option value="M" selected>M</option>
+                                                            <option value="L">L</option>
+                                                            <option value="XL">XL</option>
+                                                        </select>
+                                                    <?php } else { ?>
+                                                        <input type="hidden" name="marime" value="Standard">
+                                                    <?php } ?>
+                                                    
+                                                    <div class="d-grid gap-2">
+                                                        <button type="submit" class="btn btn-success btn-lg">Adaugă în coș 🛒</button>
+                                                        <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple">Mergi la personalizare</a>
+                                                    </div>
+                                                </form>
                                                 
-                                                <div class="d-grid gap-2">
-                                                    <a href="cos.php?adauga=<?php echo $p['ID']; ?>" class="btn btn-success btn-lg">Adaugă în coș 🛒</a>
-                                                    <a href="personalizare.php?id=<?php echo $p['ID']; ?>" class="btn btn-purple">Mergi la personalizare</a>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>

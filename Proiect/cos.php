@@ -2,40 +2,33 @@
 session_start();
 require_once 'config.php';
 
-// 1. Inițializăm coșul dacă nu există
 if (!isset($_SESSION['cos'])) {
     $_SESSION['cos'] = [];
 }
 
-// 2. Adăugarea în coș (inclusiv datele de personalizare)
 if (isset($_GET['adauga'])) {
     $id_produs = (int)$_GET['adauga'];
     
-    // Preluăm textul și culoarea, dacă există
     $text_personalizat = isset($_GET['text_personalizat']) ? trim($_GET['text_personalizat']) : '';
     $culoare_text = isset($_GET['culoare_text']) ? $_GET['culoare_text'] : '';
-
-    // Generăm o cheie unică pentru acest produs + configurația lui
-    // md5 generează un cod unic bazat pe aceste 3 elemente
-    $cheie_cos = md5($id_produs . $text_personalizat . $culoare_text);
+    $marime = isset($_GET['marime']) ? trim($_GET['marime']) : '';
+    $cheie_cos = md5($id_produs . $text_personalizat . $culoare_text . $marime);
 
     if (isset($_SESSION['cos'][$cheie_cos])) {
-        // Dacă exact aceeași configurație e deja în coș, creștem cantitatea
         $_SESSION['cos'][$cheie_cos]['cantitate']++;
     } else {
-        // Altfel, adăugăm configurația nouă
         $_SESSION['cos'][$cheie_cos] = [
             'id' => $id_produs,
             'cantitate' => 1,
             'text' => $text_personalizat,
-            'culoare' => $culoare_text
+            'culoare' => $culoare_text,
+            'marime' => $marime
         ];
     }
     header('Location: cos.php');
     exit;
 }
 
-// 3. Logica pentru modificarea cantității (+, -, ștergere) folosind cheia unică
 if (isset($_GET['action']) && isset($_GET['cheie'])) {
     $cheie_cos = $_GET['cheie'];
     $actiune = $_GET['action'];
@@ -56,7 +49,6 @@ if (isset($_GET['action']) && isset($_GET['cheie'])) {
     exit;
 }
 
-// 4. Golirea totală a coșului
 if (isset($_GET['goleste'])) {
     $_SESSION['cos'] = [];
     header('Location: cos.php');
@@ -135,7 +127,11 @@ if (isset($_GET['goleste'])) {
                                             Culoare: <span style="display:inline-block; width:12px; height:12px; background-color:<?php echo $item['culoare']; ?>; border-radius:50%; border:1px solid white;"></span> <?php echo $item['culoare']; ?>
                                         </span>
                                     <?php } else { ?>
-                                        <span class="text-muted fst-italic">Fără personalizare</span>
+                                        <span class="text-muted fst-italic">Fără text</span>
+                                    <?php } ?>
+                                    
+                                    <?php if (!empty($item['marime'])) { ?>
+                                        <br><span class="badge bg-info text-dark mt-1">Mărime: <?php echo htmlspecialchars($item['marime']); ?></span>
                                     <?php } ?>
                                 </td>
                                 <td><?php echo $produs['PRET']; ?> Lei</td>

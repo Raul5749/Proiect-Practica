@@ -90,12 +90,23 @@ if (!$produs) {
 
                         <div class="mb-3">
                             <label class="form-label">Culoare text:</label>
-                            <input type="color" id="custom-color" name="culoare_text" class="form-control form-control-color bg-dark border-secondary" value="#000000" title="Alege culoarea">
+                            <input type="color" id="custom-color" name="culoare_text" class="form-control form-control-color bg-dark border-secondary" value="#ffffff" title="Alege culoarea">
                         </div>
 
                         <div class="mb-4">
                             <label class="form-label">Mărime text: <span id="size-val">24</span>px</label>
                             <input type="range" id="custom-size" class="form-range" min="10" max="80" value="24">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-info fw-bold">Alege Mărimea:</label>
+                            <select name="marime" class="form-select bg-dark text-white border-secondary">
+                                <option value="Standard">Standard / Universală</option>
+                                <option value="S">Mărimea S</option>
+                                <option value="M">Mărimea M</option>
+                                <option value="L">Mărimea L</option>
+                                <option value="XL">Mărimea XL</option>
+                            </select>
                         </div>
 
                         <div class="d-grid gap-2">

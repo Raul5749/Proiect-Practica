@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
         
         <div class="text-center">
-            <a href="proiect.php" class="text-muted text-decoration-none">Înapoi la magazin</a>
+            <a href="proiect.php" class=" text-decoration-none" style="color: white;">Înapoi la magazin</a>
         </div>
     </div>
 

@@ -55,7 +55,7 @@ $utilizatori = $pdo->query($sql_users)->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container-fluid"> 
         <div class="row">
             
             <div class="col-md-3 col-lg-2 sidebar shadow">

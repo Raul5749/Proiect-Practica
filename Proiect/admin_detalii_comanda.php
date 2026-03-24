@@ -87,6 +87,9 @@ $produse_comandate = $stmt_prod->fetchAll(PDO::FETCH_ASSOC);
                                     <span class="badge bg-secondary">
                                         Culoare: <span style="display:inline-block; width:10px; height:10px; background-color:<?php echo $p['CULOARE_TEXT']; ?>; border-radius:50%; border:1px solid white;"></span> <?php echo $p['CULOARE_TEXT']; ?>
                                     </span>
+                                    <?php if (!empty($p['MARIME_ALEASA'])) { ?>
+                                        <br><span class="badge bg-info text-dark mt-1">Mărime: <?php echo htmlspecialchars($p['MARIME_ALEASA']); ?></span>
+                                        <?php } ?>
                                 <?php } else { ?>
                                     <span class="text-start fst-italic">Standard (fără text)</span>
                                 <?php } ?>
