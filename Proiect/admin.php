@@ -1,45 +1,29 @@
 <?php
 session_start();
 require_once 'config.php';
+require_once 'Statistici.php';
+
 if (!isset($_SESSION['ADMIN']) || $_SESSION['ADMIN'] !== 1) {
     header('Location: login.php');
     exit;
 }
+
 $stmt = $pdo->query("SELECT * FROM produse ORDER BY ID DESC");
 $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 $stmt_comenzi = $pdo->query("SELECT * FROM comenzi ORDER BY DATA_COMANDA DESC");
 $comenzi = $stmt_comenzi->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt_count = $pdo->query("SELECT COUNT(*) FROM comenzi WHERE STATUS = 'Noua' OR STATUS IS NULL");
-$comenzi_noi = $stmt_count->fetchColumn();
+$stats = new Statistici($pdo);
+$comenzi_noi = $stats->getComenziNoiCount();
 
-$sql_grafic = "SELECT DATE(DATA_COMANDA) as data_zi, SUM(TOTAL_PLATIT) as total_zi 
-               FROM comenzi 
-               WHERE DATA_COMANDA >= DATE(NOW()) - INTERVAL 7 DAY 
-               GROUP BY DATE(DATA_COMANDA) 
-               ORDER BY data_zi ASC";
-$vanzari_7_zile = $pdo->query($sql_grafic)->fetchAll(PDO::FETCH_ASSOC);
+$date_vanzari = $stats->getDateGraficVanzari();
+$zile_json = $date_vanzari['zile_json'];
+$totaluri_json = $date_vanzari['totaluri_json'];
 
-$zile_chart = [];
-$totaluri_chart = [];
-foreach($vanzari_7_zile as $v) {
-    $zile_chart[] = date('d.m', strtotime($v['data_zi'])); 
-    $totaluri_chart[] = $v['total_zi'];
-}
-$zile_json = json_encode($zile_chart);
-$totaluri_json = json_encode($totaluri_chart);
-
-$sql_status = "SELECT STATUS, COUNT(ID) as numar FROM comenzi GROUP BY STATUS";
-$statusuri_db = $pdo->query($sql_status)->fetchAll(PDO::FETCH_ASSOC);
-
-$nume_status = [];
-$numar_status = [];
-foreach($statusuri_db as $s) {
-    $nume_status[] = empty($s['STATUS']) ? 'Noua' : $s['STATUS'];
-    $numar_status[] = $s['numar'];
-}
-$nume_status_json = json_encode($nume_status);
-$numar_status_json = json_encode($numar_status);
+$date_status = $stats->getDateGraficStatus();
+$nume_status_json = $date_status['nume_json'];
+$numar_status_json = $date_status['numar_json'];
 ?>
 
 <!DOCTYPE html>
