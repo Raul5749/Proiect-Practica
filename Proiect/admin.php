@@ -197,5 +197,11 @@ $numar_status_json = $date_status['numar_json'];
             }
         });
     </script>
+    <footer style="background-color: #1f1f1f; border-top: 2px solid #6f42c1;" class="text-center text-light py-4 mt-auto w-100">
+        <div class="container">
+            <p class="mb-1">&copy; <?php echo date('Y'); ?> <span style="color: #6f42c1; font-weight: bold;">CUSTOM</span><span class="text-white fw-bold">SHOP</span>. Toate drepturile rezervate.</p>
+            <p class="small mb-0">Proiect de practică realizat de către Jarda Raul-Nicolae.</p>
+        </div>
+    </footer>
 </body>
 </html>

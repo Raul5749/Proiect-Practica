@@ -250,7 +250,12 @@ $produse = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </div>
     </div>  
-
+    <footer style="background-color: #1f1f1f; border-top: 2px solid #6f42c1;" class="text-center text-light py-4 mt-5">
+        <div class="container">
+            <p class="mb-1">&copy; <?php echo date('Y'); ?> <span style="color: #6f42c1; font-weight: bold;">CUSTOM</span><span class="text-white fw-bold">SHOP</span>. Toate drepturile rezervate.</p>
+            <p class="small mb-0">Proiect de practică realizat de către Jarda Raul-Nicolae.</p>
+        </div>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
