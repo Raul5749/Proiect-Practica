@@ -2,12 +2,10 @@
 session_start();
 require_once 'config.php';
 
-// 1. Inițializăm coșul dacă nu există
 if (!isset($_SESSION['cos'])) {
     $_SESSION['cos'] = [];
 }
 
-// 2. Adăugarea în coș
 if (isset($_GET['adauga'])) {
     $id_produs = (int)$_GET['adauga'];
     $text_personalizat = isset($_GET['text_personalizat']) ? trim($_GET['text_personalizat']) : '';
@@ -31,7 +29,6 @@ if (isset($_GET['adauga'])) {
     exit;
 }
 
-// 3. Modificare cantitate (+, -, ștergere)
 if (isset($_GET['action']) && isset($_GET['cheie'])) {
     $cheie_cos = $_GET['cheie'];
     $actiune = $_GET['action'];
@@ -52,15 +49,13 @@ if (isset($_GET['action']) && isset($_GET['cheie'])) {
     exit;
 }
 
-// 4. Golire coș
 if (isset($_GET['goleste'])) {
     $_SESSION['cos'] = [];
-    unset($_SESSION['cupon']); // Ștergem și cuponul dacă golim coșul
+    unset($_SESSION['cupon']);
     header('Location: cos.php');
     exit;
 }
 
-// 5. LOGICA PENTRU CUPONUL DE REDUCERE 🎟️
 $mesaj_cupon = '';
 if (isset($_POST['aplica_cupon'])) {
     $cod = trim($_POST['cod_cupon']);
@@ -80,7 +75,6 @@ if (isset($_POST['aplica_cupon'])) {
     }
 }
 
-// 6. Ștergere cupon
 if (isset($_GET['sterge_cupon'])) {
     unset($_SESSION['cupon']);
     header('Location: cos.php');
