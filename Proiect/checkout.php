@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>body { background-color: #121212; color: white; }</style>
 </head>
-<body class="p-5">
+<body class="p-5" >
     <div class="container" style="max-width: 600px; background-color: #1f1f1f; padding: 30px; border-radius: 10px; border: 1px solid #6f42c1;">
         <h2 class="mb-4" style="color: #bb86fc;">Detalii Livrare</h2>
         
